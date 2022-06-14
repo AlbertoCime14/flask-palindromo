@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
 
 @app.route('/', methods=['GET'])
 def palindrome():
@@ -13,28 +14,36 @@ def palindrome():
     if 'string' in request.args:
         strings_args= request.args['string']
         if strings_args.isdigit() :
-            return "please, insert a string"
+            return jsonify (
+                    error = "the parameter is not a string"
+                )
         else:
             palindrome =isPalindrome(strings_args)
             if palindrome:
-                Dict = {"palindrome" : "True"}
-                return Dict
+                count = {}
+                for i in strings_args:
+                    if i in count: #check if it exists in dictionary
+                        count[i] += 1
+                    else:
+                        count[i] = 1 #first occurrence of character
+                return jsonify (
+                    name = strings_args,
+                    palindrome = palindrome,
+                    sorted = count,
+                    length = len(strings_args)
+                )
             else:
-                Dict = {"palindrome" : "False"}
-                return Dict
+                return jsonify (
+                    name = strings_args,
+                    palindrome = palindrome,
+                )
     else:
-        return "Error: No id field provided. Please specify a string"
+     
+        return jsonify (
+                    error = "Error: No string field provided. Please specify a string"
+                )
 
-    # Create an empty list for our results
-    
-
-    # Loop through the data and match results that fit the requested ID.
-    # IDs are unique, but other fields might return many results
-   
-
-    # Use the jsonify function from Flask to convert our list of
-    # Python dictionaries to the JSON format.
-    return jsonify(strings_args)
+  
 
 if __name__=='__main__':
     app.run(port=int(os.environ.get("PORT", 8080)),host='0.0.0.0',debug=True)#port add
